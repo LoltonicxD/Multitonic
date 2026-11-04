@@ -1,7 +1,7 @@
 {
   "name": "multitonic",
   "version": "1.0.0",
-  "description": "Un espace de lancement pour TempTaff et regieHM",
+  "description": "Un espace de lancement pour TempTaff",
   "productName": "Multitonic",
   "main": "main.js",
   "author": "LoltonicxD",

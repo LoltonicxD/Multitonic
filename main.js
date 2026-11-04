@@ -1,12 +1,10 @@
 'use strict';
 const { app, BrowserWindow, ipcMain, Menu, shell } = require('electron');
 const path = require('node:path');
-const fs = require('node:fs');
 
-// Extend this registry to add another project folder and launcher card.
+// Projects shipped in this repository.
 const projects = [
-  { id: 'temptaff', name: 'TempTaff', file: 'TempTaff/index.html' },
-  { id: 'regiehm', name: 'regieHM', file: 'regieHM/index.html' }
+  { id: 'temptaff', name: 'TempTaff', file: 'TempTaff/index.html' }
 ];
 let win;
 const homeFile = path.join(__dirname, 'src', 'index.html');
@@ -16,8 +14,7 @@ function openProject(id) {
   if (project && win && !win.isDestroyed()) win.loadFile(path.join(__dirname, 'src', 'projects', project.file));
 }
 function createWindow() {
-  const iconPath = path.join(__dirname, 'src', 'assets', process.platform === 'win32' ? 'multitonic.ico' : 'multitonic.png');
-  const windowOptions = {
+  win = new BrowserWindow({
     width: 1240, height: 820, minWidth: 800, minHeight: 580,
     title: 'Multitonic', backgroundColor: '#101412', autoHideMenuBar: false,
     webPreferences: {
@@ -26,13 +23,12 @@ function createWindow() {
       webSecurity: true, sandbox: true,
       partition: 'persist:multitonic'
     }
-  };
-  if (fs.existsSync(iconPath)) windowOptions.icon = iconPath;
-  win = new BrowserWindow(windowOptions);
+  });
   win.loadFile(homeFile);
   win.webContents.on('did-finish-load', () => {
     const current = win.webContents.getURL();
     if (current === `file://${homeFile}` || current.endsWith('/src/index.html')) return;
+    // Runtime navigation affordance only; project files remain untouched.
     win.webContents.executeJavaScript(`(() => {
       if (document.getElementById('__multitonic-home')) return;
       const b=document.createElement('button'); b.id='__multitonic-home'; b.type='button'; b.textContent='←  Accueil';

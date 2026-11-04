@@ -1,6 +1,6 @@
 # Multitonic
 
-Application de bureau Electron qui regroupe le lanceur Multitonic, TempTaff et regieHM.
+Application de bureau Electron dédiée au lanceur Multitonic et à TempTaff.
 
 ## Utilisation
 
@@ -8,12 +8,14 @@ Application de bureau Electron qui regroupe le lanceur Multitonic, TempTaff et r
 2. À la racine du dépôt, exécutez `npm install`.
 3. Lancez l’application avec `npm start`.
 
-Les projets se trouvent dans `src/projects`. Pour en ajouter un, ajoutez ses fichiers puis une entrée `id`, `name` et `file` au tableau `projects` dans `main.js`.
+TempTaff se trouve dans `src/projects/TempTaff/index.html`.
 
-Les icônes de l’application sont générées par le workflow de build.
+## Authentification TempTaff
+
+TempTaff utilise Firebase Authentication avec e-mail et mot de passe. Activez le fournisseur **E-mail/Mot de passe** dans Firebase Console pour le projet configuré dans la page TempTaff. Le flux prend en charge la création d’un compte, la connexion et la déconnexion. Les données Firestore de l’application sont indexées par UID Firebase. Les comptes PIN existants ne sont pas convertis automatiquement.
 
 ## Créer l’installeur Windows
 
-GitHub Actions construit l’installeur à la demande (onglet **Actions**, workflow **Build Windows installer**, bouton **Run workflow**) et à chaque push d’une étiquette `v*`. Une étiquette publiée déclenche une release GitHub contenant `Multitonic-Setup.exe`.
+Sur Windows, exécutez `npx electron-builder --win --publish never`. L’installeur NSIS `dist/Multitonic-Setup.exe` permet de choisir le dossier d’installation et crée des raccourcis Bureau et menu Démarrer.
 
-En local, sur Windows : `npx electron-builder --win --publish never`.
+GitHub Actions construit l’installeur à la demande (onglet **Actions**, workflow **Build Windows installer**) et à chaque push d’une étiquette `v*`. Une étiquette publiée déclenche une release GitHub contenant l’installeur.
