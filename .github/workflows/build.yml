@@ -1,0 +1,63 @@
+name: Build Windows installer
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: npm install
+      - name: Install Pillow
+        run: python -m pip install Pillow
+      - name: Regenerate application icons
+        shell: bash
+        run: |
+          python - <<'PYTHON'
+          from pathlib import Path
+          from PIL import Image, ImageDraw
+
+          root = Path.cwd()
+          build = root / "build"
+          assets = root / "src" / "assets"
+          build.mkdir(parents=True, exist_ok=True)
+          assets.mkdir(parents=True, exist_ok=True)
+
+          image = Image.new("RGBA", (256, 256), (20, 32, 25, 255))
+          draw = ImageDraw.Draw(image)
+          draw.rounded_rectangle((10, 10, 246, 246), radius=54, fill=(20, 32, 25, 255))
+          draw.line([(57, 194), (57, 64), (128, 145), (199, 64), (199, 194)],
+                    fill=(199, 237, 112, 255), width=25, joint="curve")
+          image.save(assets / "multitonic.png", format="PNG", optimize=True)
+
+          sizes = [(16, 16), (24, 24), (32, 32), (48, 48),
+                   (64, 64), (128, 128), (256, 256)]
+          for destination in (build / "icon.ico", assets / "multitonic.ico"):
+              image.save(destination, format="ICO", sizes=sizes)
+          PYTHON
+      - name: Build NSIS installer
+        run: npx electron-builder --win --publish never
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Multitonic-Setup.exe
+          path: dist/Multitonic-Setup.exe
+          if-no-files-found: error
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/Multitonic-Setup.exe
